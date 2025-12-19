@@ -7,6 +7,7 @@ from routes.vote import vote_bp
 from routes.result import result_bp
 from routes.ai import ai_bp
 from routes.rank import rank_bp
+import os
 
 app = Flask(
     __name__,
@@ -32,7 +33,10 @@ def backend_static(filename):
 @app.route("/")
 @app.route("/<path:path>")
 def serve_react(path="index.html"):
-    return send_from_directory("dist", path)
+    try:
+        return send_from_directory("dist", path)
+    except:
+        return send_from_directory("dist", "index.html")
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 5000))
