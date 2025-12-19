@@ -4,7 +4,7 @@ result_bp = Blueprint("result", __name__)
 
 @result_bp.route("/result_images/<style>")
 def get_result_images(style):
-    base_path = f"/static/result/{style}"
+    base_path =  f"/backend-static/result/{style}"
 
     return jsonify({
         "hero": f"{base_path}/Hero.png",

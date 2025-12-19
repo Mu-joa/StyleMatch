@@ -24,7 +24,7 @@ def get_rank():
             "style": style,
             "count": count,
             "percent": percent,
-            "image": f"/static/rank/{style}.png"
+            "image": f"/backend-static/rank/{style}.png"
         })
 
     return jsonify(result)

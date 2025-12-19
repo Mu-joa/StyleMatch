@@ -27,12 +27,15 @@ function IconexLightDown() {
     </div>
   );
 }
-
+ const API_BASE = import.meta.env.PROD
+  ? ""
+  : "http://localhost:5000";
+  
 export default function Home() {
   const [isExpanded, setIsExpanded] = useState(false);
   const [rankData, setRankData] = useState<any[]>([]);
   useEffect(() => {
-    fetch("http://localhost:5000/rank")
+    fetch(`${API_BASE}/rank`)
     .then(res => res.json())
     .then(data => setRankData(data));
   }, []);
@@ -149,7 +152,7 @@ export default function Home() {
   <img
     alt={rankData[0].style}
     className="absolute max-w-none object-center object-cover rounded-[8px] size-full"
-    src={`http://localhost:5000${rankData[0].image}`}
+    src={API_BASE + rankData[0].image}
   />
 )}
             </div>
@@ -187,7 +190,7 @@ export default function Home() {
     <img
       alt={rankData[1].style}
       className="absolute inset-0 w-full h-full object-cover rounded-[8px]"
-      src={`http://localhost:5000${rankData[1].image}`}
+      src={API_BASE + rankData[1].image}
     />
     {/* 비활성 오버레이 */}
     <div className="absolute inset-0 bg-black/35" />
@@ -203,7 +206,7 @@ export default function Home() {
     <img
       alt={rankData[2].style}
       className="absolute inset-0 w-full h-full object-cover rounded-[8px]"
-      src={`http://localhost:5000${rankData[2].image}`}
+      src={API_BASE + rankData[2].image}
     />
     {/* 비활성 오버레이 */}
     <div className="absolute inset-0 bg-black/35" />

@@ -14,6 +14,10 @@ const styleLabels: Record<StyleType, string> = {
   unique: "특별함",
 };
 
+const API_BASE = import.meta.env.PROD
+  ? ""
+  : "http://localhost:5000";
+  
 export default function StyleMatch() {
   const navigate = useNavigate();
 
@@ -120,7 +124,7 @@ useEffect(() => {
             disabled={!isStarted}
           >
             <ImageWithFallback
-              src={currentVote.leftImage}
+              src={API_BASE.leftImage}
               alt={currentVote.leftStyle}
               className="w-full h-full object-cover transition-transform duration-700"
               style={{
@@ -169,7 +173,7 @@ useEffect(() => {
             disabled={!isStarted}
           >
             <ImageWithFallback
-              src={currentVote.rightImage}
+              src={API_BASE.rightImage}
               alt={currentVote.rightStyle}
               className="w-full h-full object-cover transition-transform duration-700"
               style={{

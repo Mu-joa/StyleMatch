@@ -28,10 +28,15 @@ export default function AIGeneration() {
   const [selections, setSelections] = useState<Partial<Record<Category, string>>>({});
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
+  const API_BASE = import.meta.env.PROD
+  ? ""
+  : "http://localhost:5000";
+
   const handleGenerate = async () => {
     try {
       console.log("generate clicked");
-      const res = await fetch("http://localhost:5000/ai/generate", {
+      
+      const res = await fetch(`${API_BASE}/ai/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,7 +56,7 @@ export default function AIGeneration() {
 
     if (data?.image) {
       // ✅ 핵심
-      setGeneratedImage(`http://localhost:5000${data.image}`);
+      setGeneratedImage(API_BASE + data.image);
     } else {
       console.error("Invalid response", data);
     }

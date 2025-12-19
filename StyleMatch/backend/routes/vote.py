@@ -36,8 +36,8 @@ def generate_votes():
         rounds.append({
             "leftStyle": cat,
             "rightStyle": other_cat,
-            "leftImage": f"/static/vote/{cat}/{left_img}",
-            "rightImage": f"/static/vote/{other_cat}/{right_img}",
+            "leftImage": f"/backend-static/vote/{cat}/{left_img}",
+            "rightImage": f"/backend-static/vote/{other_cat}/{right_img}",
         })
 
     return jsonify(rounds)

@@ -74,7 +74,10 @@ const [lookbookImages, setLookbookImages] = useState<string[]>([]);
 const [detailImage, setDetailImage] = useState<string | null>(null);
 
   // ✅ 결과 이미지 백엔드 연동
-  const API_BASE = "http://localhost:5000";
+  const API_BASE = import.meta.env.PROD
+  ? ""
+  : "http://localhost:5000";
+  
   useEffect(() => {
   fetch(`${API_BASE}/result_images/${selectedStyle}`)
     .then(res => res.json())
