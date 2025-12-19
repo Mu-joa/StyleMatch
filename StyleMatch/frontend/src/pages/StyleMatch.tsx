@@ -3,85 +3,72 @@ import { useNavigate } from "react-router";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { styleImages, StyleType } from "../data/styleImages";
+import { fetchVotes, Vote,  submitVote } from "../api/voteApi";
+import type { StyleType } from "../types/style";
 
-type Vote = {
-  leftStyle: StyleType;
-  rightStyle: StyleType;
-  leftImage: string;
-  rightImage: string;
-};
 
 const styleLabels: Record<StyleType, string> = {
-  clean: "클린 캐주얼",
-  trendy: "트렌디 스트릿",
-  formal: "포멀 클래식",
-  unique: "유니크 아트",
+  clean: "깔끔함",
+  trendy: "트렌디",
+  formal: "단정함",
+  unique: "특별함",
 };
 
 export default function StyleMatch() {
   const navigate = useNavigate();
+
+  const totalRounds = 10;
+
+  const [voteList, setVoteList] = useState<Vote[]>([]);
   const [currentRound, setCurrentRound] = useState(0);
+  const [currentVote, setCurrentVote] = useState<Vote | null>(null);
+  const [detailSide, setDetailSide] = useState<"left" | "right" | null>(null);
   const [votes, setVotes] = useState<Record<StyleType, number>>({
     clean: 0,
     trendy: 0,
     formal: 0,
     unique: 0,
   });
-  const [currentVote, setCurrentVote] = useState<Vote | null>(null);
-  const [hoveredSide, setHoveredSide] = useState<'left' | 'right' | null>(null);
+
+  const [hoveredSide, setHoveredSide] =
+    useState<"left" | "right" | null>(null);
   const [isStarted, setIsStarted] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  const totalRounds = 10;
-
-  // Generate random vote pair
-  const generateVote = (): Vote => {
-    const styles: StyleType[] = ["clean", "trendy", "formal", "unique"];
-    const leftStyle = styles[Math.floor(Math.random() * styles.length)];
-    let rightStyle = styles[Math.floor(Math.random() * styles.length)];
-    
-    // Ensure different styles
-    while (rightStyle === leftStyle) {
-      rightStyle = styles[Math.floor(Math.random() * styles.length)];
-    }
-
-    const leftImages = styleImages[leftStyle];
-    const rightImages = styleImages[rightStyle];
-    const leftImage = leftImages[Math.floor(Math.random() * leftImages.length)];
-    const rightImage = rightImages[Math.floor(Math.random() * rightImages.length)];
-
-    return { leftStyle, rightStyle, leftImage, rightImage };
-  };
-
-  useEffect(() => {
-    setCurrentVote(generateVote());
+useEffect(() => {
+    fetchVotes().then((data) => {
+      setVoteList(data);
+      setCurrentVote(data[0]);
+    });
   }, []);
 
   const handleStart = () => {
     setIsAnimating(true);
-    setTimeout(() => {
-      setIsStarted(true);
-    }, 800);
+    setTimeout(() => setIsStarted(true), 800);
   };
 
   const handleVote = (style: StyleType) => {
-    const newVotes = { ...votes, [style]: votes[style] + 1 };
-    setVotes(newVotes);
+  const newVotes = { ...votes, [style]: votes[style] + 1 };
+  setVotes(newVotes);
 
-    if (currentRound + 1 >= totalRounds) {
-      // Find the most voted style
-      const maxStyle = Object.keys(newVotes).reduce((a, b) =>
-        newVotes[a as StyleType] > newVotes[b as StyleType] ? a : b
-      ) as StyleType;
-      
-      // Navigate to result page with the winning style
-      navigate('/style-result', { state: { selectedStyle: maxStyle, votes: newVotes } });
-    } else {
-      setCurrentRound(currentRound + 1);
-      setCurrentVote(generateVote());
-    }
-  };
+  if (currentRound + 1 >= totalRounds) {
+    const maxStyle = Object.keys(newVotes).reduce((a, b) =>
+      newVotes[a as StyleType] > newVotes[b as StyleType] ? a : b
+    ) as StyleType;
+
+    // 🔥 여기서만 서버에 1번 저장
+    submitVote(maxStyle);
+
+    navigate("/style-result", {
+      state: { selectedStyle: maxStyle, votes: newVotes },
+    });
+  } else {
+    const nextRound = currentRound + 1;
+    setCurrentRound(nextRound);
+    setCurrentVote(voteList[nextRound]);
+    setDetailSide(null);
+  }
+};
 
   if (!currentVote) return null;
 
@@ -146,12 +133,25 @@ export default function StyleMatch() {
               style={{ opacity: hoveredSide === 'left' ? 1 : 0 }}
             >
               <div className="absolute bottom-[60px] left-[40px] right-[40px]">
-                <p className="font-['Pretendard:SemiBold',sans-serif] text-[32px] text-white tracking-[-0.64px] mb-[12px]">
-                  {styleLabels[currentVote.leftStyle]}
-                </p>
-                <p className="font-['Pretendard:Regular',sans-serif] text-[14px] text-white/80">
-                  자세히 보기
-                </p>
+                
+                {detailSide !== "left" && (
+                  <span
+  onClick={(e) => {
+    e.stopPropagation(); // 투표 클릭 방지
+    setDetailSide(detailSide === "left" ? null : "left");
+  }}
+  className="cursor-pointer font-['Pretendard:Regular',sans-serif] text-[14px] text-white/80 hover:text-white transition"
+>
+  자세히 보기
+  
+</span>
+)}
+{detailSide === "left" && (
+  <p className="mt-[12px] font-['Pretendard:SemiBold',sans-serif] text-[28px] text-white tracking-[-0.6px]">
+    {styleLabels[currentVote.leftStyle]}
+  </p>
+)}
+
               </div>
             </div>
           </button>
@@ -182,12 +182,22 @@ export default function StyleMatch() {
               style={{ opacity: hoveredSide === 'right' ? 1 : 0 }}
             >
               <div className="absolute bottom-[60px] left-[40px] right-[40px]">
-                <p className="font-['Pretendard:SemiBold',sans-serif] text-[32px] text-white tracking-[-0.64px] mb-[12px]">
-                  {styleLabels[currentVote.rightStyle]}
-                </p>
-                <p className="font-['Pretendard:Regular',sans-serif] text-[14px] text-white/80">
-                  자세히 보기
-                </p>
+                
+                {detailSide !== "right" && (<span
+  onClick={(e) => {
+    e.stopPropagation(); // 투표 클릭 방지
+    setDetailSide(detailSide === "right" ? null : "right");
+  }}
+  className="cursor-pointer font-['Pretendard:Regular',sans-serif] text-[14px] text-white/80 hover:text-white transition"
+>
+  자세히 보기
+</span>
+)}
+{detailSide === "right" && (
+  <p className="mt-[12px] font-['Pretendard:SemiBold',sans-serif] text-[28px] text-white tracking-[-0.6px]">
+    {styleLabels[currentVote.leftStyle]}
+  </p>
+)}
               </div>
             </div>
           </button>
@@ -197,4 +207,12 @@ export default function StyleMatch() {
       <Footer />
     </div>
   );
+}
+
+function shouldNavigate(
+  currentRound: number,
+  totalRounds: number,
+  hasNextVote: boolean
+) {
+  return currentRound + 1 >= totalRounds && hasNextVote;
 }

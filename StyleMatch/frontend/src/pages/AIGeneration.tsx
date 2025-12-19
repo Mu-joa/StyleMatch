@@ -28,10 +28,38 @@ export default function AIGeneration() {
   const [selections, setSelections] = useState<Partial<Record<Category, string>>>({});
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
 
-  const handleGenerate = () => {
-    // Mock image generation
-    setGeneratedImage("https://images.unsplash.com/photo-1483985988355-763728e1935b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=1080");
-  };
+  const handleGenerate = async () => {
+    try {
+      console.log("generate clicked");
+      const res = await fetch("http://localhost:5000/ai/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "omit",
+        body: JSON.stringify({
+          style: selections.style,
+          color: selections.color,
+          season: selections.season,
+          background: selections.background,
+        }),
+      });
+  console.log("response status", res.status);
+
+    const data = await res.json();
+    console.log("response data", data);
+
+    if (data?.image) {
+      // ✅ 핵심
+      setGeneratedImage(`http://localhost:5000${data.image}`);
+    } else {
+      console.error("Invalid response", data);
+    }
+
+  } catch (e) {
+    console.error("generate error", e);
+  }
+};
 
   const handleReset = () => {
     setGeneratedImage(null);
@@ -92,15 +120,17 @@ export default function AIGeneration() {
         {/* Generation interface */}
         <div className="flex flex-col gap-[32px]">
           {/* Puzzle grid preview/selector */}
-          <div className="w-full h-[600px] bg-[#f7f7f7] rounded-[8px] overflow-hidden relative">
+          <div className="w-full bg-[#f7f7f7] rounded-[8px] overflow-hidden">
             {generatedImage ? (
+              <div className="w-full aspect-[2/3]">
               <ImageWithFallback
                 src={generatedImage}
                 alt="Generated style"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
+              </div>
             ) : (
-              <div className="grid grid-cols-2 grid-rows-2 w-full h-full gap-[2px] bg-white p-[2px]">
+              <div className="grid grid-cols-2 grid-rows-2 w-full h-[600px] gap-[2px] bg-white p-[2px]">
                 {/* Style - Top Left */}
                 <button
                   onClick={() => setSelectedCategory(selectedCategory === 'style' ? null : 'style')}

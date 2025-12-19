@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import svgPaths from "../imports/svg-4sau7spqni";
-import imgHeaderWithImage from "figma:asset/5232b103830b7cc9a42d4746c4deb07caa32d12d.png";
-import imgImage from "figma:asset/65d68f724f70b8f021d5f479cd5eb6004696c267.png";
-import imgImage1 from "figma:asset/44b0aa43a57e23aec207706d7933d9eaa0f3360a.png";
+import imgHeaderWithImage from "../assets/헤더사진.png";
+
 
 function Down() {
   return (
@@ -31,6 +30,12 @@ function IconexLightDown() {
 
 export default function Home() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [rankData, setRankData] = useState<any[]>([]);
+  useEffect(() => {
+    fetch("http://localhost:5000/rank")
+    .then(res => res.json())
+    .then(data => setRankData(data));
+  }, []);
 
   return (
     <div className="bg-white relative min-h-screen w-full" data-name="Home">
@@ -69,7 +74,7 @@ export default function Home() {
                 Style Discovery Platform
               </p>
               <p className="font-['Pretendard:Bold',sans-serif] leading-[1.15] text-[64px] tracking-[-2px] text-black">
-                Find Your<br />Aesthetic
+                Find Your Fashion
               </p>
             </div>
             
@@ -79,14 +84,13 @@ export default function Home() {
                 다만, 당신만의 고유한 취향을 발견하고 표현하는 방법이 있을 뿐입니다.
               </p>
               <p className="mb-0">
-                AI 기반 분석으로 당신의 잠재된 스타일을 찾아내고,<br />
-                트렌드와 클래식의 균형점에서 나만의 시그니처를 완성하세요.
+                여러 가이드를 통해 스타일을 찾아내고, 나만의 시그니처를 완성해보세요.
               </p>
             </div>
             
             <Link to="/style-match" className="rounded-[8px] px-[24px] py-[12px] transition-all hover:bg-[rgba(0,0,0,0.85)] inline-flex items-center justify-center gap-[8px] w-fit bg-black text-white">
               <p className="font-['Pretendard:Medium',sans-serif] leading-[20px] text-[15px] text-nowrap whitespace-pre">
-                Start Analysis
+                Start!
               </p>
               <div className="overflow-clip relative shrink-0 size-[16px]">
                 <div className="absolute inset-[8.33%]">
@@ -111,24 +115,15 @@ export default function Home() {
                 Style Discovery Platform
               </p>
               <p className="font-['Pretendard:SemiBold',sans-serif] leading-[1.2] text-[64px] tracking-[-1.28px] text-black">
-                Find Your<br />Aesthetic
+                Fash !ON
               </p>
             </div>
             
-            <div className="flex flex-col gap-[20px] font-['Pretendard:Regular',sans-serif] text-[16px] leading-[1.8] text-[rgba(0,0,0,0.7)]">
-              <p className="mb-0">
-                스타일에는 정답이 없습니다.<br />
-                다만, 당신만의 고유한 취향을 발견하고 표현하는 방법이 있을 뿐입니다.
-              </p>
-              <p className="mb-0">
-                AI 기반 분석으로 당신의 잠재된 스타일을 찾아내고,<br />
-                트렌드와 클래식의 균형점에서 나만의 시그니처를 완성하세요.
-              </p>
-            </div>
+      
             
             <Link to="/style-match" className="rounded-[8px] px-[24px] py-[12px] transition-all hover:bg-[rgba(48,48,48,0.8)] inline-flex items-center justify-center gap-[8px] w-fit bg-[#303030] text-white">
               <p className="font-['Pretendard:Medium',sans-serif] leading-[20px] text-[15px] text-nowrap whitespace-pre">
-                Start Analysis
+                Start!
               </p>
               <div className="overflow-clip relative shrink-0 size-[16px]">
                 <div className="absolute inset-[8.33%]">
@@ -150,10 +145,36 @@ export default function Home() {
           <div className="h-[700px] rounded-[8px] relative overflow-clip">
             <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[8px]">
               <div className="absolute bg-[#f7f7f7] inset-0 rounded-[8px]" />
-              <img alt="" className="absolute max-w-none object-center object-cover rounded-[8px] size-full" src={imgHeaderWithImage} />
+              {rankData[0] && (
+  <img
+    alt={rankData[0].style}
+    className="absolute max-w-none object-center object-cover rounded-[8px] size-full"
+    src={`http://localhost:5000${rankData[0].image}`}
+  />
+)}
             </div>
             <div className="absolute flex flex-col font-['Inter:Extra_Bold',sans-serif] font-extrabold justify-center leading-[0] right-[40px] not-italic text-[96px] text-nowrap text-white bottom-[40px] tracking-[-4.8px]">
-              <p className="leading-[1.5] whitespace-pre">59.4%</p>
+              {rankData[0] && (
+  <p
+  className="
+    leading-[1.2]
+    whitespace-pre
+    text-[96px]
+    tracking-[-4.8px]
+    text-white
+  "
+  style={{
+    textShadow: `
+      0 1px 2px rgba(0,0,0,0.55),
+      0 -1px 2px rgba(0,0,0,0.55),
+      1px 0 2px rgba(0,0,0,0.55),
+      -1px 0 2px rgba(0,0,0,0.55)
+    `
+  }}
+>
+  {rankData[0].percent}%
+</p>
+)}
             </div>
           </div>
           
@@ -161,13 +182,33 @@ export default function Home() {
             <div className="flex-1 h-[400px] rounded-[8px] relative overflow-clip">
               <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[8px]">
                 <div className="absolute bg-[#f7f7f7] inset-0 rounded-[8px]" />
-                <img alt="" className="absolute max-w-none object-center object-cover rounded-[8px] size-full" src={imgImage} />
+                {rankData[1] && (
+  <div className="absolute inset-0">
+    <img
+      alt={rankData[1].style}
+      className="absolute inset-0 w-full h-full object-cover rounded-[8px]"
+      src={`http://localhost:5000${rankData[1].image}`}
+    />
+    {/* 비활성 오버레이 */}
+    <div className="absolute inset-0 bg-black/35" />
+  </div>
+)}
               </div>
             </div>
             <div className="flex-1 h-[400px] rounded-[8px] relative overflow-clip">
               <div aria-hidden="true" className="absolute inset-0 pointer-events-none rounded-[8px]">
                 <div className="absolute bg-[#f7f7f7] inset-0 rounded-[8px]" />
-                <img alt="" className="absolute max-w-none object-center object-cover rounded-[8px] size-full" src={imgImage1} />
+                {rankData[2] && (
+   <div className="absolute inset-0">
+    <img
+      alt={rankData[2].style}
+      className="absolute inset-0 w-full h-full object-cover rounded-[8px]"
+      src={`http://localhost:5000${rankData[2].image}`}
+    />
+    {/* 비활성 오버레이 */}
+    <div className="absolute inset-0 bg-black/35" />
+  </div>
+)}
               </div>
             </div>
           </div>
