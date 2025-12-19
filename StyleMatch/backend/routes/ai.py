@@ -7,7 +7,13 @@ from datetime import datetime
 
 ai_bp = Blueprint("ai", __name__, url_prefix="/ai")
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+def get_client():
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY not set")
+    return OpenAI(api_key=api_key)
 
 # =========================
 # 키워드 매핑 테이블
@@ -83,6 +89,7 @@ No text, no logo, no watermark.
 # =========================
 @ai_bp.route("/generate", methods=["POST"])
 def generate_image():
+    client = get_client()
     data = request.json
 
     style = data.get("style")
@@ -99,7 +106,7 @@ def generate_image():
     prompt = build_prompt(style, color, season, background)
 
     try:
-        ref_path = Path("static/reference/master_model.png")
+        ref_path = BASE_DIR / "static" / "reference" / "master_model.png"
         if not ref_path.exists():
             raise FileNotFoundError("Reference image not found")
 
@@ -115,7 +122,7 @@ def generate_image():
         image_base64 = result.data[0].b64_json
         image_bytes = base64.b64decode(image_base64)
 
-        save_dir = Path("static/generated")
+        save_dir = BASE_DIR / "static" / "generated"
         save_dir.mkdir(parents=True, exist_ok=True)
 
         filename = f"{style}_{color}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png"
@@ -123,7 +130,7 @@ def generate_image():
         save_path.write_bytes(image_bytes)
 
         return jsonify({
-            "image": f"/static/generated/{filename}"
+            "image": f"/backend-static/generated/{filename}"
         })
 
     except Exception as e:
