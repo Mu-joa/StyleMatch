@@ -33,11 +33,7 @@ def backend_static(filename):
 @app.route("/")
 @app.route("/<path:path>")
 def serve_react(path="index.html"):
-    try:
-        return send_from_directory("dist", path)
-    except:
-        return send_from_directory("dist", "index.html")
-
-if __name__ == "__main__":
-    port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    file_path = os.path.join(app.static_folder, path)
+    if os.path.exists(file_path):
+        return send_from_directory(app.static_folder, path)
+    return send_from_directory(app.static_folder, "index.html")
